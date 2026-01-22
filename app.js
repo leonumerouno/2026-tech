@@ -23,6 +23,7 @@ createApp({
                 ],
                 stats: {
                     dronesAvailable: 42,
+                    dronesTotal: 50,
                     aedsAvailable: 156,
                     aedsTotal: 160
                 },
