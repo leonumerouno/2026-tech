@@ -520,7 +520,8 @@ createApp({
             let progress = 0;
             // Speed needs to be much higher because segments are tiny
             // Ideally speed should be based on distance, but simple boost works for demo
-            const speed = 0.25; 
+            const pickupSpeed = 0.5; // Fast for pickup
+            const deliverSpeed = 0.1; // Slow for transport
 
             const animate = () => {
                 if (segmentIndex >= pathSegments.length) {
@@ -531,7 +532,9 @@ createApp({
                 }
 
                 const segment = pathSegments[segmentIndex];
-                progress += speed;
+                // Use different speed for pickup vs delivery
+                const currentSpeed = segment.type === 'pickup' ? pickupSpeed : deliverSpeed;
+                progress += currentSpeed;
 
                 if (progress >= 1) {
                     progress = 0;
