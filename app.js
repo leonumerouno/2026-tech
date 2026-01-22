@@ -276,63 +276,217 @@ createApp({
         },
 
         loadAEDData() {
-            fetch('./aed_data.json')
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(aed => {
-                        // Green marker for AEDs
-                        const aedIcon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: '<div style="background-color:#10b981; width:10px; height:10px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(16, 185, 129, 0.4);"></div>',
-                            iconSize: [10, 10],
-                            iconAnchor: [5, 5]
-                        });
-                        
-                        L.marker([aed.lat, aed.lng], { icon: aedIcon })
-                            .addTo(this.map)
-                            .bindPopup(`
-                                <div class="text-center min-w-[150px]">
-                                    <div class="font-bold text-gray-800 text-sm mb-1"><i class="fa-solid fa-heart-pulse text-green-500 mr-1"></i>AED 设备点</div>
-                                    <div class="font-bold text-green-700 mb-1">${aed.name}</div>
-                                    <div class="text-xs text-gray-500 text-left border-t pt-1 mt-1">${aed.address || '地址暂无'}</div>
-                                </div>
-                            `);
-                    });
-                    
-                    // Update stats
-                    this.adminData.stats.aedsTotal = data.length;
-                    this.adminData.stats.aedsAvailable = Math.floor(data.length * 0.95);
-                })
-                .catch(err => console.error('Failed to load AED data:', err));
+            // Inline AED data to support file:// protocol
+            const aedData = [
+                {
+                    "name": "四川省急救中心",
+                    "address": "四川省人民医院东3门南60米",
+                    "lng": 104.040325,
+                    "lat": 30.662236
+                },
+                {
+                    "name": "成都市第一人民医院南区急救中心",
+                    "address": "万象北路18号成都市中西医结合医院",
+                    "lng": 104.051208,
+                    "lat": 30.590505
+                },
+                {
+                    "name": "成都市急救指挥中心",
+                    "address": "洪安镇黄平中路2号",
+                    "lng": 104.272269,
+                    "lat": 30.654426
+                },
+                {
+                    "name": "四川省人民医院青羊院区急救中心",
+                    "address": "一环路西二段32号(青羊宫地铁站D口步行270米)",
+                    "lng": 104.040272,
+                    "lat": 30.662354
+                },
+                {
+                    "name": "四川省康复医院急救中心",
+                    "address": "永宁街道八一路81号成都国际医学城内",
+                    "lng": 103.898434,
+                    "lat": 30.717483
+                },
+                {
+                    "name": "应急救援装备",
+                    "address": "金府五金机电城43栋10号",
+                    "lng": 104.041875,
+                    "lat": 30.717725
+                },
+                {
+                    "name": "四川省第二中医医院急救中心",
+                    "address": "四川省第二中医医院",
+                    "lng": 104.054036,
+                    "lat": 30.671765
+                },
+                {
+                    "name": "成都市第六人民医院东虹院区急救",
+                    "address": "东虹路39号成都市第六人民医院东虹院区",
+                    "lng": 104.151315,
+                    "lat": 30.639812
+                },
+                {
+                    "name": "铂程非急救转运",
+                    "address": "中环路青羊大道段7号附27号",
+                    "lng": 104.007614,
+                    "lat": 30.65722
+                },
+                {
+                    "name": "成都市妇女儿童中心医院中心院区急救",
+                    "address": "日月大道一段1617号成都市妇女儿童中心医院中心院区",
+                    "lng": 103.960813,
+                    "lat": 30.676286
+                },
+                {
+                    "name": "彭州市急救中心(金彭西路)",
+                    "address": "天彭街道金彭西路178号彭州市人民医院",
+                    "lng": 103.937612,
+                    "lat": 30.988488
+                },
+                {
+                    "name": "简阳市急救指挥分中心",
+                    "address": "简城镇医院路",
+                    "lng": 104.547249,
+                    "lat": 30.388299
+                },
+                {
+                    "name": "成都天府国际机场急救中心",
+                    "address": "骏业大道成都天府国际机场",
+                    "lng": 104.450249,
+                    "lat": 30.327379
+                },
+                {
+                    "name": "金堂县急救指挥中心",
+                    "address": "万方街与万吉巷交叉口南40米",
+                    "lng": 104.422307,
+                    "lat": 30.855069
+                },
+                {
+                    "name": "蜀都客车急救中心",
+                    "address": "运力大道与金韵路交叉口东南40米",
+                    "lng": 104.150519,
+                    "lat": 30.832281
+                },
+                {
+                    "name": "四川省红十字会",
+                    "address": "玉双路3号8栋(玉双路地铁站E1口步行350米)",
+                    "lng": 104.09652,
+                    "lat": 30.655416
+                },
+                {
+                    "name": "成都市双流区红十字会",
+                    "address": "花月东街62号",
+                    "lng": 103.919348,
+                    "lat": 30.577658
+                },
+                {
+                    "name": "崇州市红十字会",
+                    "address": "蜀州南路1号",
+                    "lng": 103.669601,
+                    "lat": 30.621064
+                },
+                {
+                    "name": "郫都区红十字会",
+                    "address": "郫筒镇望丛中路998号",
+                    "lng": 103.902348,
+                    "lat": 30.795868
+                },
+                {
+                    "name": "四川红十字应急救援救护中心",
+                    "address": "沙河街道川师成教院菱窠路90号教学楼4楼",
+                    "lng": 104.119711,
+                    "lat": 30.617729
+                }
+            ];
+
+            aedData.forEach(aed => {
+                // Green marker for AEDs
+                const aedIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<div style="background-color:#10b981; width:10px; height:10px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(16, 185, 129, 0.4);"></div>',
+                    iconSize: [10, 10],
+                    iconAnchor: [5, 5]
+                });
+                
+                L.marker([aed.lat, aed.lng], { icon: aedIcon })
+                    .addTo(this.map)
+                    .bindPopup(`
+                        <div class="text-center min-w-[150px]">
+                            <div class="font-bold text-gray-800 text-sm mb-1"><i class="fa-solid fa-heart-pulse text-green-500 mr-1"></i>AED 设备点</div>
+                            <div class="font-bold text-green-700 mb-1">${aed.name}</div>
+                            <div class="text-xs text-gray-500 text-left border-t pt-1 mt-1">${aed.address || '地址暂无'}</div>
+                        </div>
+                    `);
+            });
+            
+            // Update stats
+            this.adminData.stats.aedsTotal = aedData.length;
+            this.adminData.stats.aedsAvailable = Math.floor(aedData.length * 0.95);
         },
 
         focusAlert(alert) {
             this.map.flyTo([alert.lat, alert.lng], 16);
         },
 
-        dispatchDrone(alert) {
+        async getRoute(start, end) {
+            // Check if Mapbox token is provided (placeholder)
+            const mapboxToken = ''; // User can fill this
+            
+            // Default to OSRM (Open Source Routing Machine) - Free, No Key
+            // Coordinates format: lon,lat
+            const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                    // Extract coordinates (lon,lat) and convert to (lat,lon)
+                    return data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                }
+            } catch (error) {
+                console.error("Routing failed:", error);
+            }
+            
+            // Fallback to straight line
+            return [start, end];
+        },
+
+        async dispatchDrone(alert) {
             // 1. Find nearest station (simplified for demo: Qingyang station)
             const station = { lat: 30.678, lng: 103.962, name: '青羊区站点' }; 
             
             // 2. Find nearest AED (simplified for demo: using a fixed nearby AED)
-            // Ideally we would search through loaded AEDs, but for now we'll pick one "en route" or nearby
             const aedLocation = { lat: 30.670, lng: 104.000, name: '附近AED点' };
 
-            // 3. Define path: Station -> AED -> Incident
-            const pathSegments = [
-                { start: [station.lat, station.lng], end: [aedLocation.lat, aedLocation.lng], color: '#3b82f6', label: '取货' }, // Blue: To AED
-                { start: [aedLocation.lat, aedLocation.lng], end: [alert.lat, alert.lng], color: '#10b981', label: '配送' }      // Green: To Incident
-            ];
+            // 3. Get Real Routes
+            const route1 = await this.getRoute([station.lat, station.lng], [aedLocation.lat, aedLocation.lng]);
+            const route2 = await this.getRoute([aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]);
 
-            // Draw paths
-            pathSegments.forEach(seg => {
-                L.polyline([seg.start, seg.end], { 
-                    color: seg.color, 
-                    weight: 3, 
-                    dashArray: '5, 10',
-                    opacity: 0.7 
-                }).addTo(this.map);
-            });
+            // Construct segments for animation
+            // We combine the routes into a sequence of small segments
+            const pathSegments = [];
+            
+            // Helper to add segments from points
+            const addSegments = (points, color, label, type) => {
+                for (let i = 0; i < points.length - 1; i++) {
+                    pathSegments.push({
+                        start: points[i],
+                        end: points[i+1],
+                        color: color,
+                        label: label,
+                        type: type // 'pickup' or 'deliver'
+                    });
+                }
+            };
+
+            addSegments(route1, '#3b82f6', '取货', 'pickup');
+            addSegments(route2, '#10b981', '配送', 'deliver');
+
+            // Draw paths (draw the full polylines, not just segments, for performance/look)
+            L.polyline(route1, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(this.map);
+            L.polyline(route2, { color: '#10b981', weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(this.map);
 
             // Add active drone icon
             const droneIcon = L.divIcon({
@@ -358,7 +512,9 @@ createApp({
             // Animation Logic
             let segmentIndex = 0;
             let progress = 0;
-            const speed = 0.015; // Animation speed
+            // Speed needs to be much higher because segments are tiny
+            // Ideally speed should be based on distance, but simple boost works for demo
+            const speed = 0.5; 
 
             const animate = () => {
                 if (segmentIndex >= pathSegments.length) {
@@ -372,17 +528,20 @@ createApp({
                 progress += speed;
 
                 if (progress >= 1) {
-                    // Segment complete
                     progress = 0;
                     segmentIndex++;
                     
-                    if (segmentIndex === 1) {
-                        // Picked up AED
-                        task.status = '配送AED中';
-                        droneIcon.options.html = '<i class="fa-solid fa-plane text-green-600 text-xl" style="filter: drop-shadow(0 0 2px white);"></i><i class="fa-solid fa-heart-pulse text-red-500 text-xs absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"></i>';
-                        drone.setIcon(droneIcon);
-                        drone.bindPopup("<b>已获取AED</b><br>飞往事故点...").openPopup();
-                        setTimeout(() => drone.closePopup(), 2000);
+                    // Check for state change based on segment type transition
+                    if (segmentIndex < pathSegments.length) {
+                        const nextSegment = pathSegments[segmentIndex];
+                        if (segment.type === 'pickup' && nextSegment.type === 'deliver') {
+                            // Picked up AED
+                            task.status = '配送AED中';
+                            droneIcon.options.html = '<i class="fa-solid fa-plane text-green-600 text-xl" style="filter: drop-shadow(0 0 2px white);"></i><i class="fa-solid fa-heart-pulse text-red-500 text-xs absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"></i>';
+                            drone.setIcon(droneIcon);
+                            drone.bindPopup("<b>已获取AED</b><br>飞往事故点...").openPopup();
+                            setTimeout(() => drone.closePopup(), 2000);
+                        }
                     }
                 } else {
                     // Interpolate position
@@ -391,8 +550,10 @@ createApp({
                     drone.setLatLng([lat, lng]);
                     
                     // Update task info
-                    if (Math.random() > 0.9) { // Don't update DOM too often
-                        task.eta = Math.max(0, (8 * (1 - (segmentIndex * 0.5 + progress * 0.5))).toFixed(1));
+                    if (Math.random() > 0.9) { 
+                        const totalSegments = pathSegments.length;
+                        const remaining = 1 - (segmentIndex / totalSegments);
+                        task.eta = Math.max(0, (8 * remaining).toFixed(1));
                     }
                 }
 
