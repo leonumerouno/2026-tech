@@ -23,11 +23,11 @@ createApp({
                     aedsAvailable: 105
                 },
                 alerts: [
-                    { id: 1, location: '世纪大道 100 号', description: '心脏骤停疑似，需AED支持', lat: 31.2304, lng: 121.4737 },
-                    { id: 2, location: '人民公园北门', description: '老人昏倒，呼吸微弱', lat: 31.2324, lng: 121.4697 }
+                    { id: 1, location: '天府广场东侧', description: '心脏骤停疑似，需AED支持', lat: 30.6580, lng: 104.0670 },
+                    { id: 2, location: '宽窄巷子入口', description: '游客昏倒，呼吸微弱', lat: 30.6630, lng: 104.0550 }
                 ],
                 activeTasks: [
-                    { id: 101, droneId: 'DR-08', status: '配送中', eta: 4, distance: 2.1, from: [31.22, 121.48], to: [31.23, 121.47] }
+                    { id: 101, droneId: 'DR-08', status: '配送中', eta: 4, distance: 2.1, from: [30.65, 104.06], to: [30.66, 104.07] }
                 ]
             },
             
@@ -67,11 +67,11 @@ createApp({
                 this.map = null;
             }
 
-            // Shanghai Coordinates
-            const userLoc = [31.2304, 121.4737];
-            const droneStart = [31.2250, 121.4800];
+            // Chengdu Coordinates (User at Tianfu Square area)
+            const userLoc = [30.6570, 104.0665];
+            const droneStart = [30.6700, 104.0750]; // Nearby station
 
-            this.map = L.map('user-map').setView(userLoc, 15);
+            this.map = L.map('user-map').setView(userLoc, 14);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
@@ -118,7 +118,7 @@ createApp({
                     // Simulate drone movement (interpolate)
                     if (this.map && this.droneMarker) {
                         const currentLatLng = this.droneMarker.getLatLng();
-                        const targetLatLng = L.latLng(31.2304, 121.4737); // User loc
+                        const targetLatLng = L.latLng(30.6570, 104.0665); // User loc in Chengdu
                         
                         const lat = currentLatLng.lat + (targetLatLng.lat - currentLatLng.lat) * 0.1;
                         const lng = currentLatLng.lng + (targetLatLng.lng - currentLatLng.lng) * 0.1;
@@ -170,8 +170,9 @@ createApp({
                 this.map = null;
             }
 
-            const center = [31.2304, 121.4737];
-            this.map = L.map('admin-map').setView(center, 13);
+            // Center on Chengdu
+            const center = [30.6570, 104.0665];
+            this.map = L.map('admin-map').setView(center, 11); // Zoom out a bit to see more districts
 
             // Dark theme map
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -180,19 +181,51 @@ createApp({
                 maxZoom: 19
             }).addTo(this.map);
 
-            // Add Mock Stations (Blue)
+            // Add Stations from Excel Data
             const stations = [
-                [31.22, 121.48], [31.24, 121.46], [31.21, 121.45]
+                { name: "郫都区站点", lat: 30.7958, lng: 103.8674 },
+                { name: "郫都区站点 (备用)", lat: 30.8422, lng: 103.9551 },
+                { name: "温江区站点", lat: 30.715, lng: 103.856 },
+                { name: "温江区站点 (备用)", lat: 30.655, lng: 103.81 },
+                { name: "双流区站点", lat: 30.508, lng: 103.918 },
+                { name: "双流区站点 (备用)", lat: 30.445, lng: 104.08 },
+                { name: "新津区站点", lat: 30.428, lng: 103.888 },
+                { name: "天府新区站点", lat: 30.393, lng: 104.118 },
+                { name: "天府新区站点 (备用)", lat: 30.25, lng: 104.258 },
+                { name: "龙泉驿区站点", lat: 30.603, lng: 104.18 },
+                { name: "龙泉驿区站点 (备用)", lat: 30.645, lng: 104.305 },
+                { name: "青白江区站点", lat: 30.828, lng: 104.378 },
+                { name: "青白江区站点 (备用)", lat: 30.9, lng: 104.3 },
+                { name: "新都区站点", lat: 30.82, lng: 104.155 },
+                { name: "新都区站点 (备用)", lat: 30.88, lng: 104.25 },
+                { name: "青羊区站点", lat: 30.678, lng: 103.962 },
+                { name: "武侯区站点", lat: 30.625, lng: 104.0 },
+                { name: "高新区站点", lat: 30.52, lng: 104.075 },
+                { name: "锦江区站点", lat: 30.592, lng: 104.132 },
+                { name: "成华区站点", lat: 30.722, lng: 104.152 },
+                { name: "金牛区站点", lat: 30.758, lng: 104.045 }
             ];
-            stations.forEach(loc => {
-                L.circleMarker(loc, {
+
+            stations.forEach(station => {
+                // Generate random drone count (0-10)
+                const droneCount = Math.floor(Math.random() * 11);
+                
+                L.circleMarker([station.lat, station.lng], {
                     radius: 6,
                     fillColor: "#3b82f6",
                     color: "#fff",
                     weight: 1,
                     opacity: 1,
                     fillOpacity: 0.8
-                }).addTo(this.map).bindPopup("无人机站点 / AED仓库");
+                }).addTo(this.map).bindPopup(`
+                    <div class="text-center">
+                        <div class="font-bold text-gray-800">${station.name}</div>
+                        <div class="text-sm mt-1">
+                            <i class="fa-solid fa-plane-up text-blue-500"></i>
+                            无人机数量: <span class="font-bold text-blue-600">${droneCount}</span> 架
+                        </div>
+                    </div>
+                `);
             });
 
             // Add Alerts (Red)
@@ -213,8 +246,8 @@ createApp({
         },
 
         dispatchDrone(alert) {
-            // Find nearest station (mock)
-            const station = [31.22, 121.48];
+            // Find nearest station (using first one for demo)
+            const station = [30.678, 103.962]; // Qingyang station
             
             // Add route line
             const route = [station, [alert.lat, alert.lng]];
