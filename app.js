@@ -239,6 +239,35 @@ createApp({
                 L.marker([alert.lat, alert.lng], { icon: icon }).addTo(this.map)
                     .bindPopup(`<b>${alert.location}</b><br>${alert.description}`);
             });
+
+            // Fetch and Add AED Locations (Green)
+            fetch('./aed_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(aed => {
+                        const aedIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: '<div style="background-color:#10b981; width:10px; height:10px; border-radius:50%; border:2px solid white; box-shadow: 0 0 5px rgba(16, 185, 129, 0.4);"></div>',
+                            iconSize: [10, 10],
+                            iconAnchor: [5, 5]
+                        });
+                        
+                        L.marker([aed.lat, aed.lng], { icon: aedIcon })
+                            .addTo(this.map)
+                            .bindPopup(`
+                                <div class="text-center min-w-[150px]">
+                                    <div class="font-bold text-gray-800 text-sm mb-1"><i class="fa-solid fa-heart-pulse text-green-500 mr-1"></i>AED 设备点</div>
+                                    <div class="font-bold text-green-700 mb-1">${aed.name}</div>
+                                    <div class="text-xs text-gray-500 text-left border-t pt-1 mt-1">${aed.address || '地址暂无'}</div>
+                                </div>
+                            `);
+                    });
+                    
+                    // Update stats
+                    this.adminData.stats.aedsTotal = data.length;
+                    this.adminData.stats.aedsAvailable = Math.floor(data.length * 0.95);
+                })
+                .catch(err => console.error('Failed to load AED data:', err));
         },
 
         focusAlert(alert) {
@@ -246,44 +275,96 @@ createApp({
         },
 
         dispatchDrone(alert) {
-            // Find nearest station (using first one for demo)
-            const station = [30.678, 103.962]; // Qingyang station
+            // 1. Find nearest station (simplified for demo: Qingyang station)
+            const station = { lat: 30.678, lng: 103.962, name: '青羊区站点' }; 
             
-            // Add route line
-            const route = [station, [alert.lat, alert.lng]];
-            const polyline = L.polyline(route, { color: '#10b981', weight: 3, dashArray: '5, 10' }).addTo(this.map);
-            
+            // 2. Find nearest AED (simplified for demo: using a fixed nearby AED)
+            // Ideally we would search through loaded AEDs, but for now we'll pick one "en route" or nearby
+            const aedLocation = { lat: 30.670, lng: 104.000, name: '附近AED点' };
+
+            // 3. Define path: Station -> AED -> Incident
+            const pathSegments = [
+                { start: [station.lat, station.lng], end: [aedLocation.lat, aedLocation.lng], color: '#3b82f6', label: '取货' }, // Blue: To AED
+                { start: [aedLocation.lat, aedLocation.lng], end: [alert.lat, alert.lng], color: '#10b981', label: '配送' }      // Green: To Incident
+            ];
+
+            // Draw paths
+            pathSegments.forEach(seg => {
+                L.polyline([seg.start, seg.end], { 
+                    color: seg.color, 
+                    weight: 3, 
+                    dashArray: '5, 10',
+                    opacity: 0.7 
+                }).addTo(this.map);
+            });
+
             // Add active drone icon
             const droneIcon = L.divIcon({
-                html: '<i class="fa-solid fa-plane text-green-500 text-lg"></i>',
+                html: '<i class="fa-solid fa-plane text-blue-500 text-xl" style="filter: drop-shadow(0 0 2px white);"></i>',
                 className: 'drone-moving',
-                iconSize: [20, 20]
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
             });
-            const drone = L.marker(station, { icon: droneIcon }).addTo(this.map);
-
-            // Add to active tasks list
-            this.adminData.activeTasks.unshift({
-                id: Date.now(),
+            const drone = L.marker([station.lat, station.lng], { icon: droneIcon, zIndexOffset: 1000 }).addTo(this.map);
+            
+            // Task Data
+            const taskId = Date.now();
+            const task = {
+                id: taskId,
                 droneId: 'DR-' + Math.floor(Math.random() * 90 + 10),
-                status: '出勤中',
-                eta: 5,
-                distance: 3.2
-            });
+                status: '前往取AED',
+                eta: 8,
+                distance: 5.5,
+                progress: 0
+            };
+            this.adminData.activeTasks.unshift(task);
 
-            // Simple animation
-            let step = 0;
-            const steps = 100;
-            const interval = setInterval(() => {
-                step++;
-                const lat = station[0] + (alert.lat - station[0]) * (step / steps);
-                const lng = station[1] + (alert.lng - station[1]) * (step / steps);
-                drone.setLatLng([lat, lng]);
+            // Animation Logic
+            let segmentIndex = 0;
+            let progress = 0;
+            const speed = 0.015; // Animation speed
 
-                if (step >= steps) {
-                    clearInterval(interval);
-                    drone.bindPopup("已到达").openPopup();
+            const animate = () => {
+                if (segmentIndex >= pathSegments.length) {
+                    drone.bindPopup("<b>救援完成</b><br>AED已送达事故点").openPopup();
+                    task.status = '已送达';
+                    task.eta = 0;
+                    return;
                 }
-            }, 50);
+
+                const segment = pathSegments[segmentIndex];
+                progress += speed;
+
+                if (progress >= 1) {
+                    // Segment complete
+                    progress = 0;
+                    segmentIndex++;
+                    
+                    if (segmentIndex === 1) {
+                        // Picked up AED
+                        task.status = '配送AED中';
+                        droneIcon.options.html = '<i class="fa-solid fa-plane text-green-600 text-xl" style="filter: drop-shadow(0 0 2px white);"></i><i class="fa-solid fa-heart-pulse text-red-500 text-xs absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"></i>';
+                        drone.setIcon(droneIcon);
+                        drone.bindPopup("<b>已获取AED</b><br>飞往事故点...").openPopup();
+                        setTimeout(() => drone.closePopup(), 2000);
+                    }
+                } else {
+                    // Interpolate position
+                    const lat = segment.start[0] + (segment.end[0] - segment.start[0]) * progress;
+                    const lng = segment.start[1] + (segment.end[1] - segment.start[1]) * progress;
+                    drone.setLatLng([lat, lng]);
+                    
+                    // Update task info
+                    if (Math.random() > 0.9) { // Don't update DOM too often
+                        task.eta = Math.max(0, (8 * (1 - (segmentIndex * 0.5 + progress * 0.5))).toFixed(1));
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            };
+
+            // Start animation
+            requestAnimationFrame(animate);
         }
     }
 }).mount('#app');
