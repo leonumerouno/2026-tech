@@ -120,8 +120,9 @@ createApp({
         startUserSimulation() {
             // Reset state
             this.userState.step = 0;
-            this.userState.eta = 12;
+            this.userState.eta = 20;
             this.userState.isRecycled = false;
+            this.userState.recycleStatus = 0;
 
             if (this.userState.simulationInterval) clearInterval(this.userState.simulationInterval);
 
@@ -135,24 +136,24 @@ createApp({
                         const currentLatLng = this.droneMarker.getLatLng();
                         const targetLatLng = L.latLng(30.6570, 104.0665); // User loc in Chengdu
                         
-                        const lat = currentLatLng.lat + (targetLatLng.lat - currentLatLng.lat) * 0.1;
-                        const lng = currentLatLng.lng + (targetLatLng.lng - currentLatLng.lng) * 0.1;
+                        const lat = currentLatLng.lat + (targetLatLng.lat - currentLatLng.lat) * 0.05;
+                        const lng = currentLatLng.lng + (targetLatLng.lng - currentLatLng.lng) * 0.05;
                         
                         this.droneMarker.setLatLng([lat, lng]);
                     }
 
                     // Update steps based on ETA
-                    if (this.userState.eta <= 10 && this.userState.step === 0) {
+                    if (this.userState.eta <= 16 && this.userState.step === 0) {
                         this.userState.step = 1; // Picked up
                     }
-                    if (this.userState.eta <= 8 && this.userState.step === 1) {
+                    if (this.userState.eta <= 12 && this.userState.step === 1) {
                         this.userState.step = 2; // Delivering
                     }
                 } else {
                     this.userState.step = 3; // Arrived
                     clearInterval(this.userState.simulationInterval);
                 }
-            }, 1000); // Fast simulation: 1 sec = 1 min
+            }, 2000); // Slower simulation: 2 sec = 1 min
         },
 
         getProgressWidth() {
@@ -172,9 +173,14 @@ createApp({
 
         recycleAED() {
             if (confirm('确认已使用完毕并归还设备？')) {
-                this.userState.isRecycled = true;
-                alert('感谢您的使用！无人机将自动回收设备。');
-                // Simulate return flight could go here
+                this.userState.recycleStatus = 1;
+                alert('请在原地等待回收车辆');
+                
+                // Simulate vehicle arrival time (e.g. 5 seconds)
+                setTimeout(() => {
+                    this.userState.recycleStatus = 2;
+                    this.userState.isRecycled = true;
+                }, 5000);
             }
         },
 
@@ -514,7 +520,7 @@ createApp({
             let progress = 0;
             // Speed needs to be much higher because segments are tiny
             // Ideally speed should be based on distance, but simple boost works for demo
-            const speed = 0.5; 
+            const speed = 0.25; 
 
             const animate = () => {
                 if (segmentIndex >= pathSegments.length) {
