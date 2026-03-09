@@ -508,18 +508,18 @@ createApp({
             addSegments(deliverRoute, '#10b981', '配送', 'deliver');
 
             // Draw paths - keep previous routes visible
-            // Pickup route: black line from station to AED
+            // Pickup route: green line from station to AED
             if (pickupRoute && pickupRoute.length > 0) {
                 console.log('Drawing pickup route with', pickupRoute.length, 'points');
-                const pickupLine = L.polyline(pickupRoute, { color: '#111111', weight: 5, opacity: 0.9 }).addTo(this.map);
+                const pickupLine = L.polyline(pickupRoute, { color: '#10b981', weight: 5, opacity: 0.9 }).addTo(this.map);
                 setTimeout(() => {
                     pickupLine.bindTooltip('取货路线', { permanent: true, direction: 'auto', offset: [0, -10] });
                 }, 100);
             }
-            // Delivery route: green line from AED to alert
+            // Delivery route: darker green line from AED to alert
             if (deliverRoute && deliverRoute.length > 0) {
                 console.log('Drawing delivery route with', deliverRoute.length, 'points');
-                const deliverLine = L.polyline(deliverRoute, { color: '#10b981', weight: 5, opacity: 0.9 }).addTo(this.map);
+                const deliverLine = L.polyline(deliverRoute, { color: '#047857', weight: 5, opacity: 0.9 }).addTo(this.map);
                 setTimeout(() => {
                     deliverLine.bindTooltip('配送路线', { permanent: true, direction: 'auto', offset: [0, -10] });
                 }, 100);
