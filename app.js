@@ -480,6 +480,13 @@ createApp({
             console.log('Route1 (pickup):', route1);
             console.log('Route2 (delivery):', route2);
 
+            // Ensure routes have valid data (fallback to straight line if needed)
+            const pickupRoute = (route1 && route1.length > 0) ? route1 : [[station.lat, station.lng], [aedLocation.lat, aedLocation.lng]];
+            const deliverRoute = (route2 && route2.length > 0) ? route2 : [[aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]];
+
+            console.log('PickupRoute to draw:', pickupRoute);
+            console.log('DeliverRoute to draw:', deliverRoute);
+
             // Construct segments for animation
             // We combine the routes into a sequence of small segments
             const pathSegments = [];
@@ -497,18 +504,20 @@ createApp({
                 }
             };
 
-            addSegments(route1, '#3b82f6', '取货', 'pickup');
-            addSegments(route2, '#10b981', '配送', 'deliver');
+            addSegments(pickupRoute, '#3b82f6', '取货', 'pickup');
+            addSegments(deliverRoute, '#10b981', '配送', 'deliver');
 
             // Draw paths - keep previous routes visible
             // Pickup route: black line from station to AED
-            if (route1 && route1.length > 0) {
-                const pickupLine = L.polyline(route1, { color: '#111111', weight: 5, opacity: 0.9 });
+            if (pickupRoute && pickupRoute.length > 0) {
+                console.log('Drawing pickup route with', pickupRoute.length, 'points');
+                const pickupLine = L.polyline(pickupRoute, { color: '#111111', weight: 5, opacity: 0.9 });
                 pickupLine.addTo(this.adminRouteLayer).bindTooltip('取货路线', { permanent: true, direction: 'auto', offset: [0, -10] });
             }
             // Delivery route: green line from AED to alert
-            if (route2 && route2.length > 0) {
-                const deliverLine = L.polyline(route2, { color: '#10b981', weight: 5, opacity: 0.9 });
+            if (deliverRoute && deliverRoute.length > 0) {
+                console.log('Drawing delivery route with', deliverRoute.length, 'points');
+                const deliverLine = L.polyline(deliverRoute, { color: '#10b981', weight: 5, opacity: 0.9 });
                 deliverLine.addTo(this.adminRouteLayer).bindTooltip('配送路线', { permanent: true, direction: 'auto', offset: [0, -10] });
             }
 
