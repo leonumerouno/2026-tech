@@ -31,7 +31,9 @@ createApp({
                     { id: 1, lat: 30.658, lng: 104.065, location: '天府广场地铁站C口', description: '突发心脏骤停', time: '10:42' },
                     { id: 2, lat: 30.628, lng: 104.075, location: '四川大学望江校区', description: '昏迷倒地', time: '10:45' }
                 ]
-            }
+            },
+            // Admin route overlay layer
+            adminRouteLayer: null
         };
     },
     mounted() {
@@ -202,6 +204,9 @@ createApp({
                     fadeAnimation: true,
                     zoomAnimation: true
                 }).setView(center, 11); // Zoom out a bit to see more districts
+                
+                // Route overlay layer group
+                this.adminRouteLayer = L.layerGroup().addTo(this.map);
 
                 // Dark theme map
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -490,9 +495,15 @@ createApp({
             addSegments(route1, '#3b82f6', '取货', 'pickup');
             addSegments(route2, '#10b981', '配送', 'deliver');
 
-            // Draw paths (draw the full polylines, not just segments, for performance/look)
-            L.polyline(route1, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(this.map);
-            L.polyline(route2, { color: '#10b981', weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(this.map);
+            // Clear previous route overlays
+            if (this.adminRouteLayer) {
+                this.adminRouteLayer.clearLayers();
+            }
+            // Draw paths prominently: pickup (black), delivery (green)
+            const pickupLine = L.polyline(route1, { color: '#111111', weight: 5, opacity: 0.9 });
+            const deliverLine = L.polyline(route2, { color: '#10b981', weight: 5, opacity: 0.9 });
+            pickupLine.addTo(this.adminRouteLayer).bindTooltip('取货路线', { permanent: true, direction: 'auto', offset: [0, -10] });
+            deliverLine.addTo(this.adminRouteLayer).bindTooltip('配送路线', { permanent: true, direction: 'auto', offset: [0, -10] });
 
             // Add active drone icon
             const droneIcon = L.divIcon({
