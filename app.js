@@ -452,6 +452,8 @@ createApp({
                 const response = await fetch(url);
                 const data = await response.json();
                 
+                console.log('OSRM Response:', data);
+                
                 if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
                     // Extract coordinates (lon,lat) and convert to (lat,lon)
                     return data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
@@ -474,6 +476,9 @@ createApp({
             // 3. Get Real Routes
             const route1 = await this.getRoute([station.lat, station.lng], [aedLocation.lat, aedLocation.lng]);
             const route2 = await this.getRoute([aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]);
+
+            console.log('Route1 (pickup):', route1);
+            console.log('Route2 (delivery):', route2);
 
             // Construct segments for animation
             // We combine the routes into a sequence of small segments
