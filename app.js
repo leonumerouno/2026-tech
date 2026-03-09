@@ -495,15 +495,17 @@ createApp({
             addSegments(route1, '#3b82f6', '取货', 'pickup');
             addSegments(route2, '#10b981', '配送', 'deliver');
 
-            // Clear previous route overlays
-            if (this.adminRouteLayer) {
-                this.adminRouteLayer.clearLayers();
+            // Draw paths - keep previous routes visible
+            // Pickup route: black line from station to AED
+            if (route1 && route1.length > 0) {
+                const pickupLine = L.polyline(route1, { color: '#111111', weight: 5, opacity: 0.9 });
+                pickupLine.addTo(this.adminRouteLayer).bindTooltip('取货路线', { permanent: true, direction: 'auto', offset: [0, -10] });
             }
-            // Draw paths prominently: pickup (black), delivery (green)
-            const pickupLine = L.polyline(route1, { color: '#111111', weight: 5, opacity: 0.9 });
-            const deliverLine = L.polyline(route2, { color: '#10b981', weight: 5, opacity: 0.9 });
-            pickupLine.addTo(this.adminRouteLayer).bindTooltip('取货路线', { permanent: true, direction: 'auto', offset: [0, -10] });
-            deliverLine.addTo(this.adminRouteLayer).bindTooltip('配送路线', { permanent: true, direction: 'auto', offset: [0, -10] });
+            // Delivery route: green line from AED to alert
+            if (route2 && route2.length > 0) {
+                const deliverLine = L.polyline(route2, { color: '#10b981', weight: 5, opacity: 0.9 });
+                deliverLine.addTo(this.adminRouteLayer).bindTooltip('配送路线', { permanent: true, direction: 'auto', offset: [0, -10] });
+            }
 
             // Add active drone icon
             const droneIcon = L.divIcon({
