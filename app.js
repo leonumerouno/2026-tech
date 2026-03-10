@@ -289,23 +289,6 @@ createApp({
 
         initCharts() {
             setTimeout(() => {
-                const pieChart = echarts.init(document.getElementById('chart-pie'));
-                pieChart.setOption({
-                    tooltip: { trigger: 'item', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#06b6d4', textStyle: { color: '#fff' } },
-                    series: [{
-                        type: 'pie',
-                        radius: ['50%', '80%'],
-                        avoidLabelOverlap: false,
-                        label: { show: false },
-                        data: [
-                            { value: 42, name: '无人机', itemStyle: { color: '#06b6d4' } },
-                            { value: 156, name: 'AED', itemStyle: { color: '#10b981' } },
-                            { value: 28, name: '救护车', itemStyle: { color: '#f97316' } },
-                            { value: 15, name: '医生', itemStyle: { color: '#8b5cf6' } }
-                        ]
-                    }]
-                });
-
                 const barChart = echarts.init(document.getElementById('chart-bar'));
                 barChart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#8b5cf6', textStyle: { color: '#fff' } },

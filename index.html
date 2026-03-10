@@ -340,13 +340,25 @@
 
                     <!-- Data Dashboard -->
                     <div class="absolute bottom-4 left-4 right-4 flex gap-3 z-[400]">
-                        <!-- Panel 1: Pie Chart - 设备分布 -->
+                        <!-- Panel 1: AED Time Window Compliance -->
                         <div
                             class="bg-gray-900/90 backdrop-blur border border-cyan-500/30 rounded-xl p-3 flex-1 shadow-lg shadow-cyan-500/10">
                             <h4 class="text-cyan-400 text-xs font-bold mb-2 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-pie"></i> 设备分布占比
+                                <i class="fa-solid fa-clock"></i> AED启用时间窗符合率
                             </h4>
-                            <div id="chart-pie" class="h-28"></div>
+                            <div class="h-28 flex items-center justify-center">
+                                <div class="relative w-24 h-24">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="40" fill="none" stroke="#1f2937" stroke-width="8" />
+                                        <circle cx="50" cy="50" r="40" fill="none" stroke="#06b6d4" stroke-width="8"
+                                            stroke-dasharray="251.2" stroke-dashoffset="40.2" stroke-linecap="round"
+                                            class="transition-all duration-1000" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-2xl font-bold text-white">84%</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Panel 2: Bar Chart - 任务统计 -->
