@@ -307,10 +307,10 @@ createApp({
                 lineChart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#10b981', textStyle: { color: '#fff' } },
                     grid: { left: '3%', right: '3%', bottom: '3%', top: '10%', containLabel: true },
-                    xAxis: { type: 'category', data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    xAxis: { type: 'category', data: ['001', '002', '003'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
                     yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, splitLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
                     series: [{
-                        data: [3.2, 2.8, 4.5, 5.2, 4.8, 3.9, 3.5],
+                        data: [3.2, 3.6, 3.4],
                         type: 'line',
                         smooth: true,
                         symbol: 'circle',
