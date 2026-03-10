@@ -337,6 +337,62 @@
                             <span class="text-gray-300">无人机路线</span>
                         </div>
                     </div>
+
+                    <!-- Data Dashboard -->
+                    <div class="absolute bottom-4 left-4 right-4 flex gap-3 z-[400]">
+                        <!-- Panel 1: Pie Chart - 设备分布 -->
+                        <div
+                            class="bg-gray-900/90 backdrop-blur border border-cyan-500/30 rounded-xl p-3 flex-1 shadow-lg shadow-cyan-500/10">
+                            <h4 class="text-cyan-400 text-xs font-bold mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie"></i> 设备分布占比
+                            </h4>
+                            <div id="chart-pie" class="h-28"></div>
+                        </div>
+
+                        <!-- Panel 2: Bar Chart - 任务统计 -->
+                        <div
+                            class="bg-gray-900/90 backdrop-blur border border-purple-500/30 rounded-xl p-3 flex-1 shadow-lg shadow-purple-500/10">
+                            <h4 class="text-purple-400 text-xs font-bold mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-column"></i> 区域任务统计
+                            </h4>
+                            <div id="chart-bar" class="h-28"></div>
+                        </div>
+
+                        <!-- Panel 3: Line Chart - 响应时间 -->
+                        <div
+                            class="bg-gray-900/90 backdrop-blur border border-green-500/30 rounded-xl p-3 flex-1 shadow-lg shadow-green-500/10">
+                            <h4 class="text-green-400 text-xs font-bold mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line"></i> 响应时间趋势
+                            </h4>
+                            <div id="chart-line" class="h-28"></div>
+                        </div>
+
+                        <!-- Panel 4: Stats Summary -->
+                        <div
+                            class="bg-gray-900/90 backdrop-blur border border-orange-500/30 rounded-xl p-3 flex-1 shadow-lg shadow-orange-500/10">
+                            <h4 class="text-orange-400 text-xs font-bold mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-bolt"></i> 实时数据
+                            </h4>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-gray-800/50 p-2 rounded">
+                                    <div class="text-gray-400">今日任务</div>
+                                    <div class="text-xl font-bold text-white">128</div>
+                                </div>
+                                <div class="bg-gray-800/50 p-2 rounded">
+                                    <div class="text-gray-400">完成率</div>
+                                    <div class="text-xl font-bold text-green-400">96.2%</div>
+                                </div>
+                                <div class="bg-gray-800/50 p-2 rounded">
+                                    <div class="text-gray-400">平均响应</div>
+                                    <div class="text-xl font-bold text-cyan-400">4.2min</div>
+                                </div>
+                                <div class="bg-gray-800/50 p-2 rounded">
+                                    <div class="text-gray-400">AED部署</div>
+                                    <div class="text-xl font-bold text-purple-400">156</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </main>
             </div>
         </div>
@@ -345,6 +401,9 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
     <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>

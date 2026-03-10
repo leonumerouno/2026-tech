@@ -283,7 +283,61 @@ createApp({
                 });
 
                 this.loadAEDData();
+                this.initCharts();
             }, 50);
+        },
+
+        initCharts() {
+            setTimeout(() => {
+                const pieChart = echarts.init(document.getElementById('chart-pie'));
+                pieChart.setOption({
+                    tooltip: { trigger: 'item', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#06b6d4', textStyle: { color: '#fff' } },
+                    series: [{
+                        type: 'pie',
+                        radius: ['50%', '80%'],
+                        avoidLabelOverlap: false,
+                        label: { show: false },
+                        data: [
+                            { value: 42, name: '无人机', itemStyle: { color: '#06b6d4' } },
+                            { value: 156, name: 'AED', itemStyle: { color: '#10b981' } },
+                            { value: 28, name: '救护车', itemStyle: { color: '#f97316' } },
+                            { value: 15, name: '医生', itemStyle: { color: '#8b5cf6' } }
+                        ]
+                    }]
+                });
+
+                const barChart = echarts.init(document.getElementById('chart-bar'));
+                barChart.setOption({
+                    tooltip: { trigger: 'axis', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#8b5cf6', textStyle: { color: '#fff' } },
+                    grid: { left: '3%', right: '3%', bottom: '3%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: ['高新', '天府', '锦江', '武侯', '成华', '金牛'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, splitLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    series: [{
+                        data: [45, 38, 32, 28, 22, 18],
+                        type: 'bar',
+                        itemStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#8b5cf6' }, { offset: 1, color: '#6366f1' }] } },
+                        barWidth: '50%'
+                    }]
+                });
+
+                const lineChart = echarts.init(document.getElementById('chart-line'));
+                lineChart.setOption({
+                    tooltip: { trigger: 'axis', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#10b981', textStyle: { color: '#fff' } },
+                    grid: { left: '3%', right: '3%', bottom: '3%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, splitLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    series: [{
+                        data: [3.2, 2.8, 4.5, 5.2, 4.8, 3.9, 3.5],
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: { color: '#10b981', width: 2 },
+                        itemStyle: { color: '#10b981' },
+                        areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(16,185,129,0.4)' }, { offset: 1, color: 'rgba(16,185,129,0)' }] } }
+                    }]
+                });
+            }, 500);
         },
 
         loadAEDData() {
