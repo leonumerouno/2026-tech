@@ -247,9 +247,18 @@
                                 <div class="flex gap-2">
                                     <button
                                         class="flex-1 bg-red-600 hover:bg-red-500 text-white text-xs py-1.5 rounded transition-colors"
-                                        @click.stop="dispatchDrone(alert)">
-                                        立即调度
+                                        @click.stop="dispatchDrone(alert, 1)">
+                                        模式一：卡车汇合
                                     </button>
+                                    <button
+                                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-1.5 rounded transition-colors"
+                                        @click.stop="dispatchDrone(alert, 2)">
+                                        模式二：直飞取AED
+                                    </button>
+                                </div>
+                                <div v-if="alert.mode" class="mt-1 text-xs text-center"
+                                    :class="alert.mode === 1 ? 'text-orange-300' : 'text-cyan-300'">
+                                    {{ alert.mode === 1 ? '🚛 卡车+无人机汇合模式' : '🚁 无人机直飞取AED' }}
                                 </div>
                             </div>
                         </div>
@@ -320,12 +329,12 @@
                         </div>
                         <div class="h-px bg-gray-700 my-2"></div>
                         <div class="flex items-center gap-2">
-                            <span class="w-6 h-1 bg-green-500 block"></span>
-                            <span class="text-gray-300">取货路线</span>
+                            <span class="w-6 h-1 bg-orange-500 block"></span>
+                            <span class="text-gray-300">卡车路线</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-6 h-1 bg-green-700 block"></span>
-                            <span class="text-gray-300">配送路线</span>
+                            <span class="w-6 h-1 bg-cyan-500 block"></span>
+                            <span class="text-gray-300">无人机路线</span>
                         </div>
                     </div>
                 </main>

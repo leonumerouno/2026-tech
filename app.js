@@ -466,141 +466,213 @@ createApp({
             return [start, end];
         },
 
-        async dispatchDrone(alert) {
-            // 1. Find nearest station (simplified for demo: Qingyang station)
-            const station = { lat: 30.678, lng: 103.962, name: '青羊区站点' }; 
+        async dispatchDrone(alert, mode = 1) {
+            alert.mode = mode;
             
-            // 2. Find nearest AED (simplified for demo: using a fixed nearby AED)
+            // Fixed locations for demo
+            const station = { lat: 30.678, lng: 103.962, name: '青羊区站点' };
             const aedLocation = { lat: 30.670, lng: 104.000, name: '附近AED点' };
-
-            // 3. Get Real Routes
-            const route1 = await this.getRoute([station.lat, station.lng], [aedLocation.lat, aedLocation.lng]);
-            const route2 = await this.getRoute([aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]);
-
-            console.log('Route1 (pickup):', route1);
-            console.log('Route2 (delivery):', route2);
-
-            // Ensure routes have valid data (fallback to straight line if needed)
-            const pickupRoute = (route1 && route1.length > 0) ? route1 : [[station.lat, station.lng], [aedLocation.lat, aedLocation.lng]];
-            const deliverRoute = (route2 && route2.length > 0) ? route2 : [[aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]];
-
-            console.log('PickupRoute to draw:', pickupRoute);
-            console.log('DeliverRoute to draw:', deliverRoute);
-
-            // Construct segments for animation
-            // We combine the routes into a sequence of small segments
-            const pathSegments = [];
             
-            // Helper to add segments from points
-            const addSegments = (points, color, label, type) => {
-                for (let i = 0; i < points.length - 1; i++) {
-                    pathSegments.push({
-                        start: points[i],
-                        end: points[i+1],
-                        color: color,
-                        label: label,
-                        type: type // 'pickup' or 'deliver'
-                    });
-                }
+            // Calculate middle meeting point for mode 1 (truck + drone rendezvous)
+            const meetingPoint = {
+                lat: (station.lat + aedLocation.lat) / 2,
+                lng: (station.lng + aedLocation.lng) / 2
             };
 
-            addSegments(pickupRoute, '#3b82f6', '取货', 'pickup');
-            addSegments(deliverRoute, '#10b981', '配送', 'deliver');
-
-            // Draw paths - keep previous routes visible
-            // Pickup route: green line from station to AED
-            if (pickupRoute && pickupRoute.length > 0) {
-                console.log('Drawing pickup route with', pickupRoute.length, 'points');
-                const pickupLine = L.polyline(pickupRoute, { color: '#10b981', weight: 5, opacity: 0.9 }).addTo(this.map);
-                setTimeout(() => {
-                    pickupLine.bindTooltip('取货路线', { permanent: true, direction: 'auto', offset: [0, -10] });
-                }, 100);
+            const pathSegments = [];
+            
+            if (mode === 1) {
+                // 模式一：卡车+无人机汇合模式
+                // 1. Truck route: station -> meeting point (carries AED + drone)
+                const truckRoute = await this.getRoute([station.lat, station.lng], [meetingPoint.lat, meetingPoint.lng]);
+                // 2. Drone route after meeting: meeting point -> AED -> incident
+                const droneToAED = await this.getRoute([meetingPoint.lat, meetingPoint.lng], [aedLocation.lat, aedLocation.lng]);
+                const droneToIncident = await this.getRoute([aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]);
+                
+                // Draw truck route (orange)
+                if (truckRoute && truckRoute.length > 0) {
+                    const truckLine = L.polyline(truckRoute, { color: '#f97316', weight: 5, opacity: 0.9 }).addTo(this.map);
+                    setTimeout(() => truckLine.bindTooltip('卡车路线', { permanent: true, direction: 'auto', offset: [0, -10] }), 100);
+                }
+                
+                // Draw drone route (cyan) - from meeting point to AED to incident
+                const fullDroneRoute = [...droneToAED, ...droneToIncident];
+                if (fullDroneRoute.length > 0) {
+                    const droneLine = L.polyline(fullDroneRoute, { color: '#06b6d4', weight: 5, opacity: 0.9 }).addTo(this.map);
+                    setTimeout(() => droneLine.bindTooltip('无人机路线', { permanent: true, direction: 'auto', offset: [0, -10] }), 100);
+                }
+                
+                // Build segments for animation
+                const addSegments = (points, color, label, type) => {
+                    for (let i = 0; i < points.length - 1; i++) {
+                        pathSegments.push({ start: points[i], end: points[i+1], color, label, type });
+                    }
+                };
+                
+                addSegments(truckRoute, '#f97316', '卡车', 'truck');
+                addSegments(droneToAED, '#06b6d4', '无人机取AED', 'dronePickup');
+                addSegments(droneToIncident, '#06b6d4', '无人机配送', 'droneDeliver');
+                
+            } else {
+                // 模式二：无人机直接取AED模式
+                // 1. Drone route: station -> AED -> incident
+                const droneToAED = await this.getRoute([station.lat, station.lng], [aedLocation.lat, aedLocation.lng]);
+                const droneToIncident = await this.getRoute([aedLocation.lat, aedLocation.lng], [alert.lat, alert.lng]);
+                
+                // Draw drone route (cyan)
+                const fullDroneRoute = [...droneToAED, ...droneToIncident];
+                if (fullDroneRoute.length > 0) {
+                    const droneLine = L.polyline(fullDroneRoute, { color: '#06b6d4', weight: 5, opacity: 0.9 }).addTo(this.map);
+                    setTimeout(() => droneLine.bindTooltip('无人机路线', { permanent: true, direction: 'auto', offset: [0, -10] }), 100);
+                }
+                
+                // Build segments for animation
+                const addSegments = (points, color, label, type) => {
+                    for (let i = 0; i < points.length - 1; i++) {
+                        pathSegments.push({ start: points[i], end: points[i+1], color, label, type });
+                    }
+                };
+                
+                addSegments(droneToAED, '#06b6d4', '无人机取AED', 'dronePickup');
+                addSegments(droneToIncident, '#06b6d4', '无人机配送', 'droneDeliver');
             }
-            // Delivery route: darker green line from AED to alert
-            if (deliverRoute && deliverRoute.length > 0) {
-                console.log('Drawing delivery route with', deliverRoute.length, 'points');
-                const deliverLine = L.polyline(deliverRoute, { color: '#047857', weight: 5, opacity: 0.9 }).addTo(this.map);
-                setTimeout(() => {
-                    deliverLine.bindTooltip('配送路线', { permanent: true, direction: 'auto', offset: [0, -10] });
-                }, 100);
-            }
 
-            // Add active drone icon
+            // Add icons
             const droneIcon = L.divIcon({
-                html: '<i class="fa-solid fa-plane text-blue-500 text-xl" style="filter: drop-shadow(0 0 2px white);"></i>',
+                html: '<i class="fa-solid fa-plane text-cyan-500 text-xl" style="filter: drop-shadow(0 0 2px white);"></i>',
                 className: 'drone-moving',
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
             });
-            const drone = L.marker([station.lat, station.lng], { icon: droneIcon, zIndexOffset: 1000 }).addTo(this.map);
+            
+            const startPos = mode === 1 ? [meetingPoint.lat, meetingPoint.lng] : [station.lat, station.lng];
+            const drone = L.marker(startPos, { icon: droneIcon, zIndexOffset: 1000 }).addTo(this.map);
+            
+            // Add truck icon for mode 1
+            let truck = null;
+            if (mode === 1) {
+                const truckIcon = L.divIcon({
+                    html: '<i class="fa-solid fa-truck text-orange-500 text-xl" style="filter: drop-shadow(0 0 2px white);"></i>',
+                    className: 'truck-moving',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                truck = L.marker([station.lat, station.lng], { icon: truckIcon, zIndexOffset: 999 }).addTo(this.map);
+            }
             
             // Task Data
             const taskId = Date.now();
             const task = {
                 id: taskId,
                 droneId: 'DR-' + Math.floor(Math.random() * 90 + 10),
-                status: '前往取AED',
+                status: mode === 1 ? '卡车前往汇合点' : '前往取AED',
                 eta: 8,
                 distance: 5.5,
-                progress: 0
+                progress: 0,
+                mode: mode
             };
             this.adminData.activeTasks.unshift(task);
 
-            // Animation Logic
+            // Animation
             let segmentIndex = 0;
             let progress = 0;
-            // Speed needs to be much higher because segments are tiny
-            // Ideally speed should be based on distance, but simple boost works for demo
-            const pickupSpeed = 0.5; // Fast for pickup
-            const deliverSpeed = 0.1; // Slow for transport
+            let truckProgress = 0;
+            
+            const truckSpeed = 0.3;
+            const dronePickupSpeed = 0.5;
+            const droneDeliverSpeed = 0.1;
 
             const animate = () => {
-                if (segmentIndex >= pathSegments.length) {
-                    drone.bindPopup("<b>救援完成</b><br>AED已送达事故点").openPopup();
-                    task.status = '已送达';
-                    task.eta = 0;
-                    return;
-                }
-
-                const segment = pathSegments[segmentIndex];
-                // Use different speed for pickup vs delivery
-                const currentSpeed = segment.type === 'pickup' ? pickupSpeed : deliverSpeed;
-                progress += currentSpeed;
-
-                if (progress >= 1) {
-                    progress = 0;
-                    segmentIndex++;
-                    
-                    // Check for state change based on segment type transition
-                    if (segmentIndex < pathSegments.length) {
-                        const nextSegment = pathSegments[segmentIndex];
-                        if (segment.type === 'pickup' && nextSegment.type === 'deliver') {
-                            // Picked up AED
-                            task.status = '配送AED中';
-                            droneIcon.options.html = '<i class="fa-solid fa-plane text-green-600 text-xl" style="filter: drop-shadow(0 0 2px white);"></i><i class="fa-solid fa-heart-pulse text-red-500 text-xs absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"></i>';
-                            drone.setIcon(droneIcon);
-                            drone.bindPopup("<b>已获取AED</b><br>飞往事故点...").openPopup();
-                            setTimeout(() => drone.closePopup(), 2000);
+                if (mode === 1) {
+                    // Mode 1: Animate truck first, then drone
+                    if (truck && segmentIndex < pathSegments.length && pathSegments[segmentIndex].type === 'truck') {
+                        truckProgress += truckSpeed;
+                        if (truckProgress >= 1) {
+                            truckProgress = 0;
+                            segmentIndex++;
+                            // Truck arrived at meeting point, now drone starts
+                            if (segmentIndex < pathSegments.length && pathSegments[segmentIndex].type.startsWith('drone')) {
+                                task.status = '无人机取AED中';
+                            }
+                        } else {
+                            const seg = pathSegments[0];
+                            const lat = seg.start[0] + (seg.end[0] - seg.start[0]) * truckProgress;
+                            const lng = seg.start[1] + (seg.end[1] - seg.start[1]) * truckProgress;
+                            truck.setLatLng([lat, lng]);
                         }
                     }
-                } else {
-                    // Interpolate position
-                    const lat = segment.start[0] + (segment.end[0] - segment.start[0]) * progress;
-                    const lng = segment.start[1] + (segment.end[1] - segment.start[1]) * progress;
-                    drone.setLatLng([lat, lng]);
                     
-                    // Update task info
-                    if (Math.random() > 0.9) { 
-                        const totalSegments = pathSegments.length;
-                        const remaining = 1 - (segmentIndex / totalSegments);
-                        task.eta = Math.max(0, (8 * remaining).toFixed(1));
+                    if (segmentIndex >= pathSegments.length) {
+                        drone.bindPopup("<b>救援完成</b><br>AED已送达事故点").openPopup();
+                        task.status = '已送达';
+                        task.eta = 0;
+                        return;
                     }
+                    
+                    const segment = pathSegments[segmentIndex];
+                    const currentSpeed = segment.type === 'truck' ? truckSpeed : 
+                                        segment.type === 'dronePickup' ? dronePickupSpeed : droneDeliverSpeed;
+                    progress += currentSpeed;
+                    
+                    if (progress >= 1) {
+                        progress = 0;
+                        segmentIndex++;
+                        if (segmentIndex < pathSegments.length) {
+                            const nextSeg = pathSegments[segmentIndex];
+                            if (segment.type === 'dronePickup' && nextSeg.type === 'droneDeliver') {
+                                task.status = '配送AED中';
+                                droneIcon.options.html = '<i class="fa-solid fa-plane text-green-600 text-xl" style="filter: drop-shadow(0 0 2px white);"></i><i class="fa-solid fa-heart-pulse text-red-500 text-xs absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"></i>';
+                                drone.setIcon(droneIcon);
+                                drone.bindPopup("<b>已获取AED</b><br>飞往事故点...").openPopup();
+                                setTimeout(() => drone.closePopup(), 2000);
+                            }
+                        }
+                    } else {
+                        const lat = segment.start[0] + (segment.end[0] - segment.start[0]) * progress;
+                        const lng = segment.start[1] + (segment.end[1] - segment.start[1]) * progress;
+                        drone.setLatLng([lat, lng]);
+                    }
+                } else {
+                    // Mode 2: Direct drone animation
+                    if (segmentIndex >= pathSegments.length) {
+                        drone.bindPopup("<b>救援完成</b><br>AED已送达事故点").openPopup();
+                        task.status = '已送达';
+                        task.eta = 0;
+                        return;
+                    }
+                    
+                    const segment = pathSegments[segmentIndex];
+                    const currentSpeed = segment.type === 'dronePickup' ? dronePickupSpeed : droneDeliverSpeed;
+                    progress += currentSpeed;
+                    
+                    if (progress >= 1) {
+                        progress = 0;
+                        segmentIndex++;
+                        if (segmentIndex < pathSegments.length) {
+                            const nextSeg = pathSegments[segmentIndex];
+                            if (segment.type === 'dronePickup' && nextSeg.type === 'droneDeliver') {
+                                task.status = '配送AED中';
+                                droneIcon.options.html = '<i class="fa-solid fa-plane text-green-600 text-xl" style="filter: drop-shadow(0 0 2px white);"></i><i class="fa-solid fa-heart-pulse text-red-500 text-xs absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"></i>';
+                                drone.setIcon(droneIcon);
+                                drone.bindPopup("<b>已获取AED</b><br>飞往事故点...").openPopup();
+                                setTimeout(() => drone.closePopup(), 2000);
+                            }
+                        }
+                    } else {
+                        const lat = segment.start[0] + (segment.end[0] - segment.start[0]) * progress;
+                        const lng = segment.start[1] + (segment.end[1] - segment.start[1]) * progress;
+                        drone.setLatLng([lat, lng]);
+                    }
+                }
+
+                if (Math.random() > 0.9) {
+                    const remaining = 1 - (segmentIndex / pathSegments.length);
+                    task.eta = Math.max(0, (8 * remaining).toFixed(1));
                 }
 
                 requestAnimationFrame(animate);
             };
 
-            // Start animation
             requestAnimationFrame(animate);
         }
     }
