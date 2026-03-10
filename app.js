@@ -289,14 +289,30 @@ createApp({
 
         initCharts() {
             setTimeout(() => {
+                const pieChart = echarts.init(document.getElementById('chart-pie'));
+                pieChart.setOption({
+                    tooltip: { trigger: 'item', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#06b6d4', textStyle: { color: '#fff' } },
+                    series: [{
+                        type: 'pie',
+                        radius: ['50%', '80%'],
+                        avoidLabelOverlap: false,
+                        label: { show: false },
+                        data: [
+                            { value: 80, name: '近（绕路小于1公里）', itemStyle: { color: '#10b981' } },
+                            { value: 17, name: '较近（绕路1-3公里）', itemStyle: { color: '#f59e0b' } },
+                            { value: 3, name: '较远（绕路大于3公里）', itemStyle: { color: '#ef4444' } }
+                        ]
+                    }]
+                });
+
                 const barChart = echarts.init(document.getElementById('chart-bar'));
                 barChart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#8b5cf6', textStyle: { color: '#fff' } },
                     grid: { left: '3%', right: '3%', bottom: '3%', top: '10%', containLabel: true },
-                    xAxis: { type: 'category', data: ['高新', '天府', '锦江', '武侯', '成华', '金牛'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
-                    yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, splitLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    xAxis: { type: 'category', data: ['001', '002', '003', '004', '005', '006', '007'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    yAxis: { type: 'value', min: 150, max: 450, axisLine: { lineStyle: { color: '#374151' } }, splitLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9, formatter: '{value}元' } },
                     series: [{
-                        data: [45, 38, 32, 28, 22, 18],
+                        data: [320, 280, 410, 350, 190, 450, 250],
                         type: 'bar',
                         itemStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#8b5cf6' }, { offset: 1, color: '#6366f1' }] } },
                         barWidth: '50%'
@@ -307,10 +323,10 @@ createApp({
                 lineChart.setOption({
                     tooltip: { trigger: 'axis', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#10b981', textStyle: { color: '#fff' } },
                     grid: { left: '3%', right: '3%', bottom: '3%', top: '10%', containLabel: true },
-                    xAxis: { type: 'category', data: ['001', '002', '003'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
+                    xAxis: { type: 'category', data: ['001', '002', '003', '004', '005', '006', '007'], axisLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
                     yAxis: { type: 'value', axisLine: { lineStyle: { color: '#374151' } }, splitLine: { lineStyle: { color: '#374151' } }, axisLabel: { color: '#9ca3af', fontSize: 9 } },
                     series: [{
-                        data: [3.2, 3.6, 3.4],
+                        data: [3.2, 3.6, 3.4, 3.8, 3.1, 3.5, 3.7],
                         type: 'line',
                         smooth: true,
                         symbol: 'circle',
