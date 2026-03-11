@@ -294,14 +294,27 @@ createApp({
                     tooltip: { trigger: 'item', backgroundColor: 'rgba(17,24,39,0.9)', borderColor: '#06b6d4', textStyle: { color: '#fff' } },
                     series: [{
                         type: 'pie',
-                        radius: ['40%', '75%'],
+                        radius: ['35%', '65%'],
+                        center: ['50%', '50%'],
                         avoidLabelOverlap: true,
-                        label: { show: true, position: 'inside', color: '#fff', fontSize: 9, formatter: '{b}\n{d}%' },
-                        labelLine: { show: false },
+                        itemGap: 8,
+                        label: { 
+                            show: true, 
+                            position: 'outside', 
+                            color: '#e5e7eb', 
+                            fontSize: 9,
+                            formatter: '{b}\n{d}%'
+                        },
+                        labelLine: { 
+                            show: true, 
+                            length: 8, 
+                            length2: 6,
+                            lineStyle: { color: '#6b7280' }
+                        },
                         data: [
-                            { value: 80, name: '近', itemStyle: { color: '#10b981' } },
-                            { value: 17, name: '较近', itemStyle: { color: '#f59e0b' } },
-                            { value: 3, name: '较远', itemStyle: { color: '#ef4444' } }
+                            { value: 80, name: '近（绕路小于1公里）', itemStyle: { color: '#10b981' } },
+                            { value: 17, name: '较近（绕路1-3公里）', itemStyle: { color: '#f59e0b' } },
+                            { value: 3, name: '较远（绕路大于3公里）', itemStyle: { color: '#ef4444' } }
                         ]
                     }]
                 });
