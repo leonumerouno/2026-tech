@@ -3,12 +3,13 @@ const { createApp, ref, reactive, nextTick } = Vue;
 createApp({
     data() {
         return {
-            currentView: 'user', // 'user' or 'admin'
+            currentView: 'home', // 'home', 'user' or 'admin'
             map: null,
             droneMarker: null,
             
             // User Platform State
             userState: {
+                isStarted: false,
                 step: 0, // 0: Dispatching, 1: Picked up, 2: Delivering, 3: Arrived
                 eta: 12, // minutes
                 isRecycled: false,
@@ -44,6 +45,11 @@ createApp({
         });
     },
     methods: {
+        startRescue() {
+            this.userState.isStarted = true;
+            this.startUserSimulation();
+        },
+
         async switchView(view) {
             this.currentView = view;
             
