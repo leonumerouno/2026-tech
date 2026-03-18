@@ -260,17 +260,17 @@
                                     <button
                                         class="flex-1 bg-red-600 hover:bg-red-500 text-white text-xs py-1.5 rounded transition-colors"
                                         @click.stop="dispatchDrone(alert, 1)">
-                                        模式一：卡车汇合
+                                        模式一：15分钟
                                     </button>
                                     <button
                                         class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-1.5 rounded transition-colors"
                                         @click.stop="dispatchDrone(alert, 2)">
-                                        模式二：直飞取AED
+                                        模式二：12分钟
                                     </button>
                                 </div>
                                 <div v-if="alert.mode" class="mt-1 text-xs text-center"
                                     :class="alert.mode === 1 ? 'text-orange-300' : 'text-cyan-300'">
-                                    {{ alert.mode === 1 ? '🚛 卡车+无人机汇合模式' : '🚁 无人机直飞取AED' }}
+                                    {{ alert.mode === 1 ? '🚁 三角路径模式' : '🚁 直线路径模式' }}
                                 </div>
                             </div>
                         </div>
