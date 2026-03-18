@@ -11,7 +11,7 @@ createApp({
             userState: {
                 isStarted: false,
                 step: 0, // 0: Dispatching, 1: Picked up, 2: Delivering, 3: Arrived
-                eta: 12, // minutes
+                eta: 4, // minutes
                 isRecycled: false,
                 simulationInterval: null
             },
@@ -29,8 +29,8 @@ createApp({
                     aedsTotal: 160
                 },
                 alerts: [
-                    { id: 1, lat: 30.658, lng: 104.065, location: '天府广场地铁站C口', description: '突发心脏骤停', time: '10:42', mode: 2 },
-                    { id: 2, lat: 30.628, lng: 104.075, location: '四川大学望江校区', description: '昏迷倒地', time: '10:45', mode: 1 }
+                    { id: 1, lat: 30.658, lng: 104.065, location: '天府广场地铁站C口', description: '突发心脏骤停', time: '10:42', mode: 2, dispatchEta: 4.5 },
+                    { id: 2, lat: 30.628, lng: 104.075, location: '四川大学望江校区', description: '昏迷倒地', time: '10:45', mode: 1, dispatchEta: 3 }
                 ]
             },
             // Admin route overlay layer
@@ -128,7 +128,7 @@ createApp({
         startUserSimulation() {
             // Reset state
             this.userState.step = 0;
-            this.userState.eta = 20;
+            this.userState.eta = 4;
             this.userState.isRecycled = false;
             this.userState.recycleStatus = 0;
 
@@ -151,10 +151,10 @@ createApp({
                     }
 
                     // Update steps based on ETA
-                    if (this.userState.eta <= 16 && this.userState.step === 0) {
+                    if (this.userState.eta <= 3 && this.userState.step === 0) {
                         this.userState.step = 1; // Picked up
                     }
-                    if (this.userState.eta <= 12 && this.userState.step === 1) {
+                    if (this.userState.eta <= 2 && this.userState.step === 1) {
                         this.userState.step = 2; // Delivering
                     }
                 } else {
@@ -544,7 +544,7 @@ createApp({
             alert.dispatchStatus = '🚁 已调度无人机';
             
             // Determine ETA based on mode
-            const etaMinutes = mode === 1 ? 15 : 12;
+            const etaMinutes = alert.dispatchEta ?? (mode === 1 ? 15 : 12);
             
             // Fixed locations based on mode to achieve visual effect
             let station, aedLocation;
@@ -587,8 +587,8 @@ createApp({
                     const div = L.DomUtil.create('div', 'bg-white p-3 rounded-lg shadow-lg text-sm');
                     div.innerHTML = `
                         <div class="font-bold mb-2">配送模式一（三角路径）</div>
-                        <div class="flex items-center gap-2"><span class="w-4 h-0.5 bg-blue-500"></span> 无人机→AED</div>
-                        <div class="flex items-center gap-2"><span class="w-4 h-0.5 bg-green-500"></span> AED→事发地</div>
+                        <div class="flex items-center gap-2"><span style="display:inline-block;width:16px;height:2px;background:#3b82f6;"></span> 无人机→AED</div>
+                        <div class="flex items-center gap-2"><span style="display:inline-block;width:16px;height:2px;background:#22c55e;"></span> AED→事发地</div>
                         <div class="mt-2 text-gray-500">预计时间: ${etaMinutes}分钟</div>
                     `;
                     return div;
@@ -623,7 +623,7 @@ createApp({
                     const div = L.DomUtil.create('div', 'bg-white p-3 rounded-lg shadow-lg text-sm');
                     div.innerHTML = `
                         <div class="font-bold mb-2">配送模式二（直线路径）</div>
-                        <div class="flex items-center gap-2"><span class="w-4 h-0.5 bg-purple-500"></span> 无人机→AED→事发地</div>
+                        <div class="flex items-center gap-2"><span style="display:inline-block;width:16px;height:2px;background:#8b5cf6;"></span> 无人机→AED→事发地</div>
                         <div class="mt-2 text-gray-500">预计时间: ${etaMinutes}分钟</div>
                     `;
                     return div;
