@@ -29,8 +29,8 @@ createApp({
                     aedsTotal: 160
                 },
                 alerts: [
-                    { id: 1, lat: 30.658, lng: 104.065, location: '天府广场地铁站C口', description: '突发心脏骤停', time: '10:42' },
-                    { id: 2, lat: 30.628, lng: 104.075, location: '四川大学望江校区', description: '昏迷倒地', time: '10:45' }
+                    { id: 1, lat: 30.658, lng: 104.065, location: '天府广场地铁站C口', description: '突发心脏骤停', time: '10:42', mode: 2 },
+                    { id: 2, lat: 30.628, lng: 104.075, location: '四川大学望江校区', description: '昏迷倒地', time: '10:45', mode: 1 }
                 ]
             },
             // Admin route overlay layer
@@ -541,6 +541,7 @@ createApp({
 
         async dispatchDrone(alert, mode = 1) {
             alert.mode = mode;
+            alert.dispatchStatus = '🚁 已调度无人机';
             
             // Determine ETA based on mode
             const etaMinutes = mode === 1 ? 15 : 12;
